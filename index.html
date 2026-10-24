@@ -1,13 +1,211 @@
-let currentFilter = 'all';
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VocabForge</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #020617; color: #f8fafc; }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-blue-500/30">
+  
+  <main class="flex-1 w-full max-w-4xl mx-auto px-4 py-6 flex flex-col gap-6">
+    <!-- Ana Kontrol Paneli -->
+    <div id="mainView" class="flex flex-col gap-6">
+      
+      <!-- Başlık ve Dinamik Rozet -->
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl font-bold bg-gradient-to-r from-blue-400 via-indigo-300 to-sky-400 bg-clip-text text-transparent">VocabForge</span>
+        <span id="activeBadge" class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">Tümü</span>
+      </div>
 
-    // 1. DİNAMİK KATEGORİ LİSTESİ (Buraya ne yazarsan sistem onu buton yapar)
+      <!-- Üst Butonlar (Ekle vb.) -->
+      <div class="flex justify-end gap-2">
+        <button onclick="document.getElementById('addModal').classList.remove('hidden')" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition shadow-lg shadow-blue-500/20 text-sm flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Ekle
+        </button>
+      </div>
+
+      <!-- Dinamik Kategori Seçimi -->
+      <div id="categoryTabsContainer" class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <!-- Butonlar JavaScript ile buraya otomatik gelecek -->
+      </div>
+
+      <!-- Çalışma Modu Kartları -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div onclick="startTypingMode()" class="cursor-pointer group relative bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 hover:border-blue-500/50 rounded-2xl p-5 transition-all overflow-hidden">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-2xl group-hover:scale-110 transition-transform">✍️</span>
+            <span class="text-xs font-bold px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg">Klavyeli Mod</span>
+          </div>
+          <h3 class="font-bold text-white mb-1">Yazarak Ezberle</h3>
+          <p class="text-sm text-slate-400">Türkçe karşılığı gör, İngilizcesini klavyeyle yaz ve anında doğrula.</p>
+        </div>
+
+        <div class="cursor-pointer group relative bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 hover:border-indigo-500/50 rounded-2xl p-5 transition-all overflow-hidden opacity-50">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-2xl group-hover:scale-110 transition-transform">📇</span>
+            <span class="text-xs font-bold px-2 py-1 bg-slate-800 text-slate-400 rounded-lg">Yakında</span>
+          </div>
+          <h3 class="font-bold text-white mb-1">Kart Çevir & Dinle</h3>
+          <p class="text-sm text-slate-400">Ön/arka yüz çevirerek telaffuzla hızlı tekrar yap.</p>
+        </div>
+      </div>
+
+      <!-- Liste Başlığı ve Arama -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
+        <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Kayıtlı Kelimeler & Kalıplar</h2>
+        <div class="relative w-full sm:w-64">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" id="searchInput" onkeyup="renderWordList()" placeholder="Kelimelerde ara..." class="w-full bg-slate-900 border border-slate-800 text-sm rounded-xl pl-9 pr-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
+        </div>
+      </div>
+
+      <!-- Kelime Listesi -->
+      <div id="wordList" class="flex flex-col gap-3"></div>
+    </div>
+
+    <!-- Typing Modu Paneli -->
+    <div id="typingView" class="hidden flex-col items-center justify-center min-h-[70vh] gap-6">
+      <button onclick="exitTypingMode()" class="self-start text-slate-400 hover:text-white flex items-center gap-2 transition mb-4">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Listeye Dön
+      </button>
+      
+      <div class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-slate-800">
+          <div id="typeProgress" class="h-full bg-blue-500 transition-all duration-300 w-0"></div>
+        </div>
+        
+        <div class="flex justify-between items-center mb-8">
+          <span id="typeStats" class="text-sm font-semibold text-slate-400 bg-slate-950 px-3 py-1 rounded-lg border border-slate-800">0 / 0</span>
+          <span id="streakBadge" class="hidden text-sm font-bold text-amber-400 bg-amber-400/10 px-3 py-1 rounded-lg border border-amber-400/20">🔥 3 Streak!</span>
+        </div>
+
+        <div class="text-center mb-8">
+          <p class="text-sm text-slate-500 font-medium mb-2 uppercase tracking-widest">TÜRKÇE ANLAMI</p>
+          <h2 id="typeMeaning" class="text-3xl font-bold text-white mb-2 leading-tight">Anlam</h2>
+          <p id="typeContext" class="text-sm text-slate-400 italic">"Örnek cümle..."</p>
+        </div>
+
+        <div class="relative">
+          <input type="text" id="typeInput" autocomplete="off" placeholder="İngilizcesini yaz..." class="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl px-6 py-4 text-center text-xl text-white font-medium focus:outline-none focus:border-blue-500 transition placeholder-slate-600 shadow-inner">
+          <p id="typeFeedback" class="absolute -bottom-8 left-0 w-full text-center text-sm font-bold opacity-0 transition-opacity"></p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Ekleme Modalı -->
+  <div id="addModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold text-white">Yeni Kelime Ekle</h3>
+        <button onclick="document.getElementById('addModal').classList.add('hidden')" class="text-slate-500 hover:text-white transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form onsubmit="handleSaveWord(event)" class="flex flex-col gap-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-400 mb-1 ml-1">İngilizce Kelime / Kalıp *</label>
+          <input type="text" id="inpTerm" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-400 mb-1 ml-1">Türkçe Anlamı *</label>
+          <input type="text" id="inpMeaning" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-400 mb-1 ml-1">Örnek Cümle (İsteğe Bağlı)</label>
+          <input type="text" id="inpExample" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-400 mb-1 ml-1">Kategori</label>
+          <select id="inpCategory" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition appearance-none">
+            <option value="daily">⚡ Daily & Power Expressions</option>
+            <option value="tech">⚙️ Tech & Systems Vocab</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl py-3 mt-2 transition">Kaydet</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // 1. DATA VE DİNAMİK LİSTELER
+    let words = JSON.parse(localStorage.getItem('vocabForge_data')) || [];
+    let currentFilter = 'all';
+
+    // BURASI DİNAMİK MERKEZ: Buraya yeni kategori eklersen UI'da otomatik buton ve rozet oluşur.
     const CATEGORIES = [
       { id: 'all', name: 'Tümü' },
       { id: 'daily', name: 'Daily & Power' },
       { id: 'tech', name: 'Tech & Systems' }
     ];
 
-    // 2. BUTONLARI OTOMATİK ÇİZEN FONKSİYON
+    // 2. TEMEL YÖNETİM FONKSİYONLARI
+    function saveWords() {
+      localStorage.setItem('vocabForge_data', JSON.stringify(words));
+    }
+
+    function handleSaveWord(e) {
+      e.preventDefault();
+      const term = document.getElementById('inpTerm').value.trim();
+      const meaning = document.getElementById('inpMeaning').value.trim();
+      const example = document.getElementById('inpExample').value.trim();
+      const category = document.getElementById('inpCategory').value;
+
+      if(term && meaning) {
+        words.unshift({
+          id: Date.now(),
+          term,
+          meaning,
+          example,
+          category,
+          level: 1 // Yeni kelimeler doğrudan 1 yıldız ile başlar
+        });
+        saveWords();
+        document.getElementById('addModal').classList.add('hidden');
+        e.target.reset();
+        
+        // Ekrana güncel halini yansıt
+        renderCategoryTabs();
+        renderWordList();
+      }
+    }
+
+    function deleteWord(id) {
+      if(confirm("Bu kelimeyi silmek istediğine emin misin?")) {
+        words = words.filter(w => w.id !== id);
+        saveWords();
+        renderCategoryTabs();
+        renderWordList();
+      }
+    }
+
+    // Telaffuz kısmındaki parantez hatasını çözen güvenli yapı
+    function speakText(btnElement) {
+      const text = btnElement.getAttribute('data-term');
+      if(!text) return;
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US';
+      speechSynthesis.speak(u);
+    }
+
+    // 3. ARAYÜZ (UI) ÇİZİM FONKSİYONLARI
     function renderCategoryTabs() {
       const container = document.getElementById('categoryTabsContainer');
       if (!container) return;
@@ -30,19 +228,19 @@ let currentFilter = 'all';
       }).join('');
     }
 
-    // 3. FİLTRELEME VE BAŞLIK ROZETİNİ GÜNCELLEME
     function filterCategory(catId) {
       currentFilter = catId;
       
+      // Butonları güncelle
       renderCategoryTabs();
 
+      // Başlığın altındaki dinamik rozeti güncelle
       const selected = CATEGORIES.find(c => c.id === catId);
       const badge = document.getElementById('activeBadge');
       
       if (badge && selected) {
         badge.innerText = selected.name;
         
-        // Rozet renkleri
         if (catId === 'all') {
           badge.className = "text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20";
         } else if (catId === 'daily') {
@@ -55,30 +253,36 @@ let currentFilter = 'all';
       renderWordList();
     }
 
-    // 4. KELİME LİSTESİ VE YILDIZ SİSTEMİ
     function renderWordList() {
       const container = document.getElementById('wordList');
+      const searchTxt = document.getElementById('searchInput')?.value.toLowerCase() || '';
       if(!container) return;
 
       let filtered = words;
       if(currentFilter !== 'all') {
         filtered = words.filter(w => w.category === currentFilter);
       }
+      if(searchTxt) {
+        filtered = filtered.filter(w => w.term.toLowerCase().includes(searchTxt) || w.meaning.toLowerCase().includes(searchTxt));
+      }
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="p-8 text-center text-slate-500 text-sm bg-slate-900/50 rounded-2xl border border-slate-800">Kayıtlı kelime bulunamadı.</div>`;
+        container.innerHTML = `<div class="p-8 text-center text-slate-500 text-sm bg-slate-900/50 rounded-2xl border border-slate-800">Kelime bulunamadı.</div>`;
         return;
       }
 
       container.innerHTML = filtered.map(item => `
-        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex items-start justify-between gap-3 hover:border-slate-700 transition">
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex items-start justify-between gap-3 hover:border-slate-700 transition group">
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-1 flex-wrap">
               <span class="font-bold text-white tracking-wide">${item.term}</span>
               <span class="text-xs text-amber-400 font-mono">${"⭐".repeat(item.level || 1)}</span>
-              <button onclick="speakText('${item.term.replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-blue-400 p-0.5">
+              
+              <!-- Hata vermeyen güvenli buton -->
+              <button onclick="speakText(this)" data-term="${item.term.replace(/"/g, '&quot;')}" class="text-slate-400 hover:text-blue-400 p-0.5" title="Dinle">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-6-3H4a1 1 0 01-1-1v-4a1 1 0 011-1h2l4-4v14l-4-4z"/></svg>
               </button>
+              
               <span class="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full ${item.category === 'daily' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">
                 ${item.category === 'daily' ? 'Daily' : 'Tech'}
               </span>
@@ -86,9 +290,144 @@ let currentFilter = 'all';
             <p class="text-sm text-slate-300 mb-1">${item.meaning}</p>
             ${item.example ? `<p class="text-xs text-slate-400 italic">"${item.example}"</p>` : ''}
           </div>
-          <button onclick="deleteWord(${item.id})" class="text-slate-500 hover:text-rose-400 p-1.5 transition">
+          <button onclick="deleteWord(${item.id})" class="text-slate-500 hover:text-rose-400 p-1.5 transition opacity-0 group-hover:opacity-100" title="Sil">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
           </button>
         </div>
       `).join('');
     }
+
+    // 4. TYPING MODU SİSTEMİ (Seviyeli)
+    let practiceList = [];
+    let currentIdx = 0;
+    let currentStreak = 0;
+    let isAnswered = false;
+
+    function getActiveList() {
+      if (currentFilter === 'all') return words;
+      return words.filter(w => w.category === currentFilter);
+    }
+
+    function startTypingMode() {
+      const active = getActiveList();
+      if (active.length === 0) {
+        alert("Bu kategoride kelime yok!");
+        return;
+      }
+      
+      // Akıllı Sıralama: Zorlandıklarını (yıldızı az olanları) öne alır
+      practiceList = [...active].sort((a, b) => {
+        const lvlA = a.level || 1;
+        const lvlB = b.level || 1;
+        return (lvlA - lvlB) + (Math.random() - 0.5);
+      });
+
+      currentIdx = 0;
+      currentStreak = 0;
+      document.getElementById('mainView').classList.add('hidden');
+      document.getElementById('typingView').classList.remove('hidden');
+      document.getElementById('typingView').classList.add('flex');
+      
+      const inp = document.getElementById('typeInput');
+      inp.value = '';
+      inp.addEventListener('keyup', handleTypingSubmit);
+      
+      updateTypingUI();
+      inp.focus();
+    }
+
+    function exitTypingMode() {
+      document.getElementById('typingView').classList.remove('flex');
+      document.getElementById('typingView').classList.add('hidden');
+      document.getElementById('mainView').classList.remove('hidden');
+      document.getElementById('typeInput').removeEventListener('keyup', handleTypingSubmit);
+      
+      // Listeye dönüldüğünde kazanılan/kaybedilen yıldızların ekrana yansıması için
+      renderWordList();
+    }
+
+    function updateTypingUI() {
+      if (currentIdx >= practiceList.length) {
+        alert("Tebrikler! Bu kategorideki tüm kelimeleri tamamladın.");
+        exitTypingMode();
+        return;
+      }
+
+      isAnswered = false;
+      const current = practiceList[currentIdx];
+      document.getElementById('typeMeaning').innerText = current.meaning;
+      document.getElementById('typeContext').innerText = current.example ? `"${current.example}"` : "";
+      
+      document.getElementById('typeStats').innerText = `${currentIdx + 1} / ${practiceList.length}`;
+      document.getElementById('typeProgress').style.width = `${(currentIdx / practiceList.length) * 100}%`;
+      
+      const sb = document.getElementById('streakBadge');
+      if (currentStreak >= 3) {
+        sb.innerText = `🔥 ${currentStreak} Streak!`;
+        sb.classList.remove('hidden');
+      } else {
+        sb.classList.add('hidden');
+      }
+
+      const inp = document.getElementById('typeInput');
+      inp.value = '';
+      inp.className = "w-full bg-slate-950 border-2 border-slate-800 rounded-2xl px-6 py-4 text-center text-xl text-white font-medium focus:outline-none focus:border-blue-500 transition placeholder-slate-600 shadow-inner";
+      
+      const fb = document.getElementById('typeFeedback');
+      fb.style.opacity = '0';
+    }
+
+    function handleTypingSubmit(e) {
+      if (e.key !== 'Enter') return;
+      if (isAnswered) {
+        currentIdx++;
+        updateTypingUI();
+        return;
+      }
+
+      const inp = e.target;
+      const userAns = inp.value.trim().toLowerCase();
+      const current = practiceList[currentIdx];
+      const correctAns = current.term.trim().toLowerCase();
+      const fb = document.getElementById('typeFeedback');
+      
+      isAnswered = true;
+
+      if(userAns === correctAns) {
+        currentStreak++;
+        
+        // YILDIZ ARTIRMA
+        if (!current.level) current.level = 1;
+        if (current.level < 5) current.level++;
+        
+        // Asıl veriyi kaydet
+        const realWord = words.find(w => w.id === current.id);
+        if(realWord) { realWord.level = current.level; }
+        saveWords();
+
+        inp.className = "w-full bg-emerald-950/30 border-2 border-emerald-500 text-emerald-400 rounded-2xl px-6 py-4 text-center text-xl font-medium focus:outline-none transition shadow-[0_0_15px_rgba(16,185,129,0.2)]";
+        fb.innerText = "✓ Harika! Doğru Bildin (Devam için Enter)";
+        fb.className = "absolute -bottom-8 left-0 w-full text-center text-sm font-bold text-emerald-400 transition-opacity";
+      } else {
+        currentStreak = 0;
+        
+        // YANLIŞ BİLİNCE YILDIZI 1'E DÜŞÜRME
+        current.level = 1; 
+        const realWord = words.find(w => w.id === current.id);
+        if(realWord) { realWord.level = 1; }
+        saveWords();
+
+        inp.value = current.term;
+        inp.className = "w-full bg-rose-950/30 border-2 border-rose-500 text-rose-400 rounded-2xl px-6 py-4 text-center text-xl font-medium focus:outline-none transition shadow-[0_0_15px_rgba(244,63,94,0.2)]";
+        fb.innerText = "✕ Dikkat, Doğru Yazılışı İncele (Devam için Enter)";
+        fb.className = "absolute -bottom-8 left-0 w-full text-center text-sm font-bold text-rose-400 transition-opacity";
+      }
+      fb.style.opacity = '1';
+    }
+
+    // Sayfa ilk yüklendiğinde butonları ve kelimeleri ekrana bas
+    renderCategoryTabs();
+    renderWordList();
+  </script>
+</body>
+</html>
