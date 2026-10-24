@@ -335,6 +335,7 @@
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 mb-1 flex-wrap">
               <span class="font-bold text-white tracking-wide">${item.term}</span>
+              <span class="text-xs text-amber-400 font-mono">${'★'.repeat(item.level || 1)}</span>
               <button onclick="speakText('${item.term.replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-blue-400 p-0.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-6-3H4a1 1 0 01-1-1v-4a1 1 0 011-1h2l4-4v14l-4-4z"/></svg>
               </button>
@@ -372,12 +373,14 @@
 
       if(!term || !meaning) return;
 
-      words.unshift({
+        words.unshift({
         id: Date.now(),
         term,
         meaning,
         example,
-        category
+        category,
+        level: 1
+      });
       });
 
       saveWords();
@@ -420,7 +423,12 @@
 
     // 1. KLAVYELİ YAZARAK EZBERLEME MODU
     function startTypingMode() {
-      practiceList = [...getActiveList()].sort(() => Math.random() - 0.5);
+      // Düşük seviyeli (zorlanan) kelimelere öncelik ver
+      practiceList = [...getActiveList()].sort((a, b) => {
+        const lvlA = a.level || 1;
+        const lvlB = b.level || 1;
+        return (lvlA - lvlB) + (Math.random() - 0.5);
+      });
       if(practiceList.length === 0) return alert('Çalışmak için önce bir kelime ekle.');
       
       currentIndex = 0;
@@ -471,6 +479,9 @@
       if(userAns === correctAns) {
         currentStreak++;
         msg.innerText = "✓ Harika! Doğru Bildin";
+        if (!current.level) current.level = 1;
+        if (current.level < 5) current.level++;
+        saveWords();
         msg.className = "font-bold text-base text-emerald-400";
         feedback.className = "mt-6 w-full flex flex-col items-center gap-3 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10";
         input.className = "w-full bg-slate-950 border-2 border-emerald-500 rounded-xl px-4 py-3.5 text-center text-lg font-bold text-emerald-400 tracking-wide";
@@ -478,6 +489,8 @@
       } else {
         currentStreak = 0;
         msg.innerText = "✕ Dikkat, Doğru Yazılışı İncele:";
+        current.level = 1;
+        saveWords();
         msg.className = "font-bold text-base text-rose-400";
         feedback.className = "mt-6 w-full flex flex-col items-center gap-3 p-4 rounded-xl border border-rose-500/30 bg-rose-500/10";
         input.className = "w-full bg-slate-950 border-2 border-rose-500 rounded-xl px-4 py-3.5 text-center text-lg font-bold text-rose-400 tracking-wide";
