@@ -64,8 +64,16 @@
 
       <!-- Kategori Seçimi -->
      <!-- Kategori Seçimi (Otomatik) -->
-      <div id="categoryTabsContainer" class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        <!-- Butonlar JavaScript tarafından otomatik üretilecek -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+        <button onclick="filterCategory('all')" id="tab-all" class="px-4 py-2 rounded-xl text-s
+          Tümü (<span id="count-all">0</span>)
+        </button>
+        <button onclick="filterCategory('daily')" id="tab-daily" class="px-4 py-2 rounded-xl te
+          ⚡ Daily & Power (<span id="count-daily">0</span>)
+        </button>
+        <button onclick="filterCategory('tech')" id="tab-tech" class="px-4 py-2 rounded-xl text
+          ⚙ Tech & Systems (<span id="count-tech">0</span>)
+        </button>
       </div>
 
       <!-- Çalışma Modu Kartları -->
@@ -278,32 +286,6 @@
 
     // LocalStorage Yönetimi
     // İstediğin kadar kategori ekle, sistem butonları ve başlığı otomatik üretir
-    const CATEGORIES = [
-      { id: 'all', name: 'Tümü' },
-      { id: 'daily', name: 'Daily & Power' },
-      { id: 'tech', name: 'Tech & Systems' }
-    ];
-    function renderCategoryTabs() {
-      const container = document.getElementById('categoryTabsContainer');
-      if(!container) return;
-      
-      container.innerHTML = CATEGORIES.map(cat => {
-        const count = cat.id === 'all' 
-          ? words.length 
-          : words.filter(w => w.category === cat.id).length;
-          
-        const isActive = currentFilter === cat.id;
-        const activeClass = "bg-blue-600 text-white";
-        const inactiveClass = "bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800";
-        
-        return `
-          <button onclick="filterCategory('${cat.id}')" 
-            class="px-4 py-2 rounded-xl text-sm font-medium transition flex-shrink-0 ${isActive ? activeClass : inactiveClass}">
-            ${cat.name} (${count})
-          </button>
-        `;
-      }).join('');
-    }
     let words = JSON.parse(localStorage.getItem('vocab_forge_words')) || defaultWords;
     let currentFilter = 'all';
     let practiceList = [];
@@ -324,21 +306,31 @@
     }
 
    
-   function filterCategory(catId) {
-      currentFilter = catId;
-      
-      // Butonların aktifliğini ve sayılarını anında yeniden çiz
-      renderCategoryTabs();
+   function filterCategory(cat) {
+      currentFilter = cat;
+      ['all', 'daily', 'tech'].forEach(c => {
+        const btn = document.getElementById(`tab-${c}`);
+        if(c === cat) {
+          btn.className = "px-4 py-2 rounded-xl text-sm font-medium bg-blue-600 text-white transition flex-shrink-0";
+        } else {
+          btn.className = "px-4 py-2 rounded-xl text-sm font-medium bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex-shrink-0";
+        }
+      });
 
-      // Üstteki rozet yazısını doğrudan kategorinin kendi isminden al
-      const selected = CATEGORIES.find(c => c.id === catId);
+      // Butonda ne yazıyorsa rozette de birebir o yazsın
       const badge = document.getElementById('activeBadge');
-      if (badge && selected) {
-        badge.innerText = selected.name;
+      if (cat === 'all') {
+        badge.innerText = "Tümü";
+        badge.className = "text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20";
+      } else if (cat === 'daily') {
+        badge.innerText = "Daily & Power";
+        badge.className = "text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20";
+      } else if (cat === 'tech') {
+        badge.innerText = "Tech & Systems";
+        badge.className = "text-xs font-medium px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20";
       }
 
       renderWordList();
-     renderCategoryTabs();
     }
 
     function deleteWord(id) {
