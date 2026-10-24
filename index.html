@@ -41,8 +41,12 @@
 
   <!-- Üst Başlık (Sabit Değil, Kaydırınca Gider) -->
   <header id="mainHeader" class="w-full max-w-4xl mx-auto px-4 py-4 flex items-center justify-between border-b border-slate-800/40">
-    <div class="flex items-center gap-2">
-      <span class="text-xl font-bold bg-gradient-to-r from-blue-400 via-indigo-300 to-sky-400 bg-clip-text text-transparent">VocabForge</span>
+   <div class="flex flex-col">
+      <div class="flex items-center gap-2">
+        <span class="text-xl font-bold bg-gradient-to-r from-blue-400 via-indigo-300 to-sky-400 bg-clip-text text-transparent">VocabForge</span>
+        <span id="activeBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono">ALL_WORDS</span>
+      </div>
+      <p id="activeSubtext" class="text-xs text-slate-400 font-mono mt-0.5">root/workspace/all</p>
     </div>
     <div class="flex items-center gap-2">
       <button onclick="openModal('backupModal')" class="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-900 border border-slate-800 transition" title="Yedekle / Cihazlar Arası Aktar">
@@ -312,6 +316,25 @@
           btn.className = "px-4 py-2 rounded-xl text-sm font-medium bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex-shrink-0";
         }
       });
+
+      // Başlık altındaki dosya yolunu ve rozetini güncelle
+      const badge = document.getElementById('activeBadge');
+      const subtext = document.getElementById('activeSubtext');
+
+      if (cat === 'all') {
+        badge.innerText = 'ALL_WORDS';
+        badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono';
+        subtext.innerText = 'root/workspace/all';
+      } else if (cat === 'daily') {
+        badge.innerText = 'DAILY_POWER';
+        badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono';
+        subtext.innerText = 'root/workspace/daily_expressions';
+      } else if (cat === 'tech') {
+        badge.innerText = 'TECH_SYSTEMS';
+        badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono';
+        subtext.innerText = 'root/workspace/tech_and_systems';
+      }
+
       renderWordList();
     }
 
