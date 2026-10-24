@@ -421,7 +421,11 @@
 
     // 1. KLAVYELİ YAZARAK EZBERLEME MODU
     function startTypingMode() {
-      practiceList = [...getActiveList()].sort(() => Math.random() - 0.5);
+      practiceList = [...getActiveList()].sort((a, b) => {
+        const lvlA = a.level || 1;
+        const lvlB = b.level || 1;
+        return (lvlA - lvlB) + (Math.random() - 0.5);
+      });
       if(practiceList.length === 0) return alert('Çalışmak için önce bir kelime ekle.');
       
       currentIndex = 0;
