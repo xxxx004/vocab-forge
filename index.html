@@ -300,9 +300,11 @@
     }
 
     function updateCounts() {
-      document.getElementById('count-all').innerText = words.length;
-      document.getElementById('count-daily').innerText = words.filter(w => w.category === 'daily').length;
-      document.getElementById('count-tech').innerText = words.filter(w => w.category === 'tech').length;
+      try {
+        document.getElementById('count-all')?.replaceChildren(words.length);
+        document.getElementById('count-daily')?.replaceChildren(words.filter(w => w.category === 'daily').length);
+        document.getElementById('count-tech')?.replaceChildren(words.filter(w => w.category === 'tech').length);
+      } catch (e) {}
     }
 
    
