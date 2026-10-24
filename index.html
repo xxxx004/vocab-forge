@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VocabForge | Professional Vocabulary & Active Typing Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            surface: {
+              950: '#060911',
+              900: '#0b101d',
+              850: '#101728',
+              800: '#172036',
+              750: '#1e2945',
+              700: '#263455',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .transform-style-3d {
+      transform-style: preserve-3d;
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+<body class="bg-surface-950 text-slate-100 min-h-screen font-sans flex flex-col antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- Top Announcement / Deploy Link -->
+  <div class="bg-gradient-to-r from-brand-700 via-indigo-600 to-brand-600 px-4 py-2 text-center text-xs font-semibold flex items-center justify-center gap-2 text-white">
+    <span>🌐 Bu uygulamayı kendi domaininde veya ücretsiz Vercel/Netlify adresinde yayınlayabilirsin!</span>
+    <button onclick="openDeployModal()" class="underline font-bold text-amber-200 hover:text-white transition">Rehberi Aç →</button>
+  </div>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-surface-950/80 backdrop-blur-md border-b border-slate-800/80 px-4 py-3">
+    <div class="max-w-2xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-brand-500/25">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-extrabold tracking-tight text-white leading-none">VocabForge</h1>
+            <span class="text-[10px] uppercase font-mono tracking-wider bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 font-bold">Free & Open</span>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1 leading-none" id="activeDeckSubtitle">Tüm Kartlar</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2">
+        <button onclick="openBackupModal()" title="Verileri Yedekle / Yükle" class="p-2 text-slate-400 hover:text-white bg-surface-900 border border-slate-800 rounded-xl hover:bg-surface-850 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        </button>
+        <button onclick="openModal()" class="flex items-center gap-1.5 bg-brand-600 hover:bg-brand-500 active:scale-95 transition text-white px-3.5 py-2 rounded-xl font-bold text-xs shadow-lg shadow-brand-600/30">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+          <span>Ekle</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-2xl w-full mx-auto p-4 flex flex-col gap-4 pb-24">
+
+    <!-- Categories / Decks Filter -->
+    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
+      <button onclick="switchDeck('all')" class="deck-tab active-tab whitespace-nowrap px-4 py-2.5 rounded-2xl font-bold border transition" data-deck="all">
+        Tümü (<span id="count-all">0</span>)
+      </button>
+      <button onclick="switchDeck('daily')" class="deck-tab whitespace-nowrap px-4 py-2.5 rounded-2xl font-bold border transition" data-deck="daily">
+        ⚡ Daily & Power (<span id="count-daily">0</span>)
+      </button>
+      <button onclick="switchDeck('tech')" class="deck-tab whitespace-nowrap px-4 py-2.5 rounded-2xl font-bold border transition" data-deck="tech">
+        ⚙️ Tech & Systems (<span id="count-tech">0</span>)
+      </button>
+    </div>
+
+    <!-- Mode Cards -->
+    <div class="grid grid-cols-2 gap-3">
+      <button onclick="startMode('write')" class="relative overflow-hidden text-left bg-gradient-to-br from-surface-900 to-surface-850 p-4 rounded-3xl border border-brand-500/40 hover:border-brand-400 active:scale-[0.98] transition group shadow-md">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-9 h-9 rounded-xl bg-brand-500/20 text-brand-300 flex items-center justify-center font-bold text-lg">
+            ✍️
+          </div>
+          <span class="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">Klavyeli Mod</span>
+        </div>
+        <div class="text-sm font-extrabold text-white group-hover:text-brand-300 transition">Yazarak Ezberle</div>
+        <div class="text-[11px] text-slate-400 mt-1">Türkçeyi gör, İngilizcesini klavyeyle yaz ve kontrol et.</div>
+      </button>
+
+      <button onclick="startMode('flashcard')" class="relative overflow-hidden text-left bg-gradient-to-br from-surface-900 to-surface-850 p-4 rounded-3xl border border-slate-800 hover:border-slate-700 active:scale-[0.98] transition group shadow-md">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center font-bold text-lg">
+            🃏
+          </div>
+          <span class="text-[10px] font-mono text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded-md">Hızlı Kartlar</span>
+        </div>
+        <div class="text-sm font-extrabold text-white group-hover:text-indigo-300 transition">Kart Çevir & Dinle</div>
+        <div class="text-[11px] text-slate-400 mt-1">Ön/arka yüz çevirerek telaffuzla hızlı tekrar yap.</div>
+      </button>
+    </div>
+
+    <!-- VIEW: WRITE MODE -->
+    <section id="viewWriteMode" class="hidden flex flex-col gap-4">
+      <div class="flex items-center justify-between text-xs bg-surface-900 px-4 py-3 rounded-2xl border border-slate-800">
+        <div class="flex items-center gap-2">
+          <button onclick="exitModes()" class="text-slate-400 hover:text-white p-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+          <span class="font-mono text-slate-300">İlerleme: <span id="writeProgressText" class="text-white font-bold">1 / 10</span></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="flex items-center gap-1 font-mono text-amber-400 font-bold bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
+            🔥 <span id="writeStreak">0</span> Seri
+          </span>
+          <span class="flex items-center gap-1 font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+            ✓ <span id="writeCorrectCount">0</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-b from-surface-900 to-surface-850 p-6 rounded-3xl border border-slate-800 shadow-2xl relative text-center flex flex-col items-center">
+        <span class="text-[10px] font-mono uppercase tracking-wider text-slate-400 bg-surface-950 px-3 py-1 rounded-full mb-3 border border-slate-800">
+          İngilizcesini Yaz
+        </span>
+        <div id="writePromptMeaning" class="text-xl sm:text-2xl font-extrabold text-white mb-2 tracking-tight">--</div>
+        <div id="writePromptSentence" class="text-xs sm:text-sm text-slate-400 max-w-md italic mb-6">--</div>
+
+        <div class="w-full max-w-md">
+          <form id="writeForm" onsubmit="handleWriteSubmit(event)">
+            <input 
+              type="text" 
+              id="writeInput" 
+              autocomplete="off" 
+              autocapitalize="off" 
+              spellcheck="false" 
+              placeholder="İngilizce kelime veya kalıbı yaz..." 
+              class="w-full bg-surface-950 border-2 border-slate-700 focus:border-brand-500 rounded-2xl py-3.5 px-4 text-center font-mono text-base font-semibold text-white placeholder:text-slate-600 focus:outline-none transition shadow-inner"
+            />
+            <button type="submit" id="btnWriteSubmit" class="w-full mt-3 bg-brand-600 hover:bg-brand-500 active:scale-[0.99] text-white py-3 rounded-2xl font-bold text-sm transition shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2">
+              <span>Cevabı Gönder (Enter)</span>
+            </button>
+          </form>
+        </div>
+
+        <div id="writeFeedbackBox" class="w-full mt-4 p-4 rounded-2xl hidden transition-all duration-300">
+          <div id="writeFeedbackBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono mb-2"></div>
+          <div class="text-xs text-slate-300">
+            Doğru Cevap: <span id="writeCorrectAnswerDisplay" class="font-mono font-bold text-white text-base"></span>
+          </div>
+          <div class="mt-2.5 flex justify-center">
+            <button onclick="playCurrentAudio()" class="text-xs flex items-center gap-1.5 text-slate-300 hover:text-white bg-surface-950 px-3 py-1.5 rounded-xl border border-slate-800">
+              <svg class="w-3.5 h-3.5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+              <span>Telaffuzu Dinle</span>
+            </button>
+          </div>
+          <button id="btnWriteNext" onclick="nextWriteQuestion()" class="w-full mt-3 bg-slate-800 hover:bg-slate-700 active:scale-[0.99] text-white py-3 rounded-2xl font-bold text-xs transition border border-slate-700">
+            Sıradaki Soru (Enter veya Boşluk) →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: FLASHCARD MODE -->
+    <section id="viewFlashcardMode" class="hidden flex flex-col gap-4">
+      <div class="flex items-center justify-between text-xs bg-surface-900 px-4 py-3 rounded-2xl border border-slate-800">
+        <div class="flex items-center gap-2">
+          <button onclick="exitModes()" class="text-slate-400 hover:text-white p-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+          <span class="font-mono text-slate-300">Kart: <span id="cardProgressText" class="text-white font-bold">1 / 10</span></span>
+        </div>
+        <div class="text-[11px] text-slate-400">Çevirmek için karta tıkla</div>
+      </div>
+
+      <div class="w-full h-72 sm:h-80 perspective-1000 cursor-pointer" onclick="toggleCardFlip()">
+        <div id="cardInner" class="relative w-full h-full transform-style-3d transition-transform duration-500">
+          <div class="absolute inset-0 backface-hidden bg-gradient-to-br from-surface-900 to-surface-850 border border-slate-800 rounded-3xl p-6 flex flex-col items-center justify-between text-center shadow-xl">
+            <span class="text-[10px] font-mono text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full border border-brand-500/20">İngilizce İfade</span>
+            <div class="my-auto">
+              <div id="cardFrontWord" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-2">--</div>
+              <button onclick="event.stopPropagation(); playCurrentAudio()" class="inline-flex items-center gap-1.5 bg-surface-950 hover:bg-black text-slate-300 px-3 py-1.5 rounded-full text-xs font-medium border border-slate-800 transition">
+                <svg class="w-3.5 h-3.5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+                <span>Seslendir</span>
+              </button>
+            </div>
+            <div class="text-[11px] text-slate-500">Türkçe karşılığı için dokun ↻</div>
+          </div>
+
+          <div class="absolute inset-0 backface-hidden rotate-y-180 bg-gradient-to-br from-surface-850 to-surface-800 border border-brand-500/40 rounded-3xl p-6 flex flex-col items-center justify-between text-center shadow-xl">
+            <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">Türkçe Karşılık</span>
+            <div class="my-auto">
+              <div id="cardBackMeaning" class="text-xl sm:text-2xl font-bold text-white mb-3">--</div>
+              <div id="cardBackSentence" class="text-xs sm:text-sm text-slate-300 italic bg-surface-950/60 p-3 rounded-2xl border border-slate-800 max-w-sm">--</div>
+            </div>
+            <div class="text-[11px] text-slate-500">Ön yüze dönmek için dokun ↻</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="prevFlashcard()" class="flex-1 bg-surface-900 hover:bg-surface-850 text-slate-300 py-3 rounded-2xl font-bold text-xs border border-slate-800 transition active:scale-[0.98]">
+          ← Önceki
+        </button>
+        <button onclick="nextFlashcard()" class="flex-1 bg-brand-600 hover:bg-brand-500 text-white py-3 rounded-2xl font-bold text-xs shadow-lg shadow-brand-600/30 transition active:scale-[0.98]">
+          Sonraki →
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW: DEFAULT WORD LIST -->
+    <section id="viewCardList" class="flex flex-col gap-3">
+      <div class="flex items-center justify-between mt-2">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Kayıtlı Kelimeler & Kalıplar</h2>
+        <div class="relative w-48">
+          <input 
+            type="text" 
+            id="searchInput" 
+            oninput="renderCardList()" 
+            placeholder="Kelimelerde ara..." 
+            class="w-full bg-surface-900 border border-slate-800 rounded-xl py-1.5 px-3 text-xs text-white focus:outline-none focus:border-brand-500 placeholder:text-slate-600"
+          />
+        </div>
+      </div>
+
+      <div id="cardsContainer" class="flex flex-col gap-2.5">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: ADD / EDIT CARD -->
+  <div id="cardModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-surface-900 border border-slate-800 w-full max-w-md rounded-3xl p-5 shadow-2xl flex flex-col gap-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 id="modalTitle" class="text-sm font-bold text-white">Yeni Kelime / Kalıp Ekle</h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="cardForm" onsubmit="handleSaveCard(event)" class="flex flex-col gap-3">
+        <input type="hidden" id="editCardId" value="">
+
+        <div>
+          <label class="block text-[11px] font-mono text-slate-400 mb-1">Kategori</label>
+          <select id="cardDeckSelect" class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500">
+            <option value="daily">⚡ Daily & Power Expressions</option>
+            <option value="tech">⚙️ Tech & Systems Vocab</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-mono text-slate-400 mb-1">İngilizce Kelime / Kalıp *</label>
+          <input 
+            type="text" 
+            id="cardWord" 
+            required 
+            placeholder="Örn: Pragmatic veya come up with" 
+            class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500 font-bold"
+          />
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-mono text-slate-400 mb-1">Türkçe Anlamı *</label>
+          <input 
+            type="text" 
+            id="cardMeaning" 
+            required 
+            placeholder="Örn: Pratik faydaya göre hareket eden" 
+            class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-mono text-slate-400 mb-1">Örnek Cümle / Bağlam</label>
+          <textarea 
+            id="cardSentence" 
+            rows="2" 
+            placeholder="Örn: We need a pragmatic solution to finish this on time." 
+            class="w-full bg-surface-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center gap-2 mt-2">
+          <button type="button" onclick="closeModal()" class="flex-1 bg-surface-800 hover:bg-surface-750 text-slate-300 py-3 rounded-xl text-xs font-bold transition">
+            İptal
+          </button>
+          <button type="submit" class="flex-1 bg-brand-600 hover:bg-brand-500 text-white py-3 rounded-xl text-xs font-bold transition shadow-md shadow-brand-600/30">
+            Kaydet
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DEPLOY GUIDE (How to make it a live website) -->
+  <div id="deployModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-surface-900 border border-slate-700 w-full max-w-lg rounded-3xl p-6 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto no-scrollbar">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🚀</span>
+          <h3 class="text-sm font-extrabold text-white">Bu Siteyi Canlıya Alma (0 TL / Sınırsız)</h3>
+        </div>
+        <button onclick="closeDeployModal()" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="text-xs text-slate-300 space-y-4 leading-relaxed">
+        <p>Bu uygulama tamamen tek parça saf web kodundan oluşur. Dünyanın her yerinden girebileceğin gerçek bir web sitesine dönüştürmek için 2 dakikalık şu yollardan birini seçebilirsin:</p>
+
+        <!-- Method 1 -->
+        <div class="bg-surface-950 p-4 rounded-2xl border border-slate-800">
+          <div class="font-bold text-brand-400 text-sm mb-1">1. Yol: Netlify Drop (En Kolayı - Kod Yazmadan)</div>
+          <ol class="list-decimal list-inside space-y-1 text-slate-400">
+            <li>Bu <code class="text-white bg-slate-800 px-1 py-0.5 rounded font-mono">index.html</code> dosyasını bilgisayarına indir.</li>
+            <li><a href="https://app.netlify.com/drop" target="_blank" class="text-emerald-400 underline font-semibold">app.netlify.com/drop</a> adresine gir.</li>
+            <li>Dosyayı içeren klasörü sürükleyip o sayfaya bırak.</li>
+            <li>3 saniye içinde sana <code class="text-white bg-slate-800 px-1 py-0.5 rounded font-mono">senin-adin.netlify.app</code> şeklinde ömür boyu ücretsiz canlı bir web sitesi verir!</li>
+          </ol>
+        </div>
+
+        <!-- Method 2 -->
+        <div class="bg-surface-950 p-4 rounded-2xl border border-slate-800">
+          <div class="font-bold text-indigo-400 text-sm mb-1">2. Yol: GitHub Pages (Kalıcı & Kendi Domaininle)</div>
+          <ol class="list-decimal list-inside space-y-1 text-slate-400">
+            <li>GitHub hesabında <code class="text-white bg-slate-800 px-1 py-0.5 rounded font-mono">vocab-forge</code> adında yeni bir repo aç.</li>
+            <li>Bu <code class="text-white bg-slate-800 px-1 py-0.5 rounded font-mono">index.html</code> dosyasını yükle.</li>
+            <li>Settings > Pages bölümünden "Deploy from a branch (main)" seç.</li>
+            <li>Siten <code class="text-white bg-slate-800 px-1 py-0.5 rounded font-mono">kullaniciadin.github.io/vocab-forge</code> adresinde anında yayına girer. İstersen .com domainini de tek tıkla bağlayabilirsin.</li>
+          </ol>
+        </div>
+      </div>
+
+      <button onclick="closeDeployModal()" class="w-full bg-brand-600 hover:bg-brand-500 text-white py-3 rounded-2xl text-xs font-bold transition shadow-lg shadow-brand-600/30">
+        Tamam, Anladım
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: BACKUP (EXPORT / IMPORT JSON) -->
+  <div id="backupModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-surface-900 border border-slate-800 w-full max-w-md rounded-3xl p-5 shadow-2xl flex flex-col gap-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-sm font-bold text-white">Yedekle / Cihazlar Arası Aktar</h3>
+        <button onclick="closeBackupModal()" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="text-xs text-slate-300 space-y-3">
+        <p>Kelimelerini başka bir telefona veya bilgisayara aktarmak için tek tıkla dosya olarak indirebilir ya da yükleyebilirsin.</p>
+        
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <button onclick="exportData()" class="bg-surface-950 border border-slate-700 hover:border-brand-500 text-white p-3.5 rounded-2xl flex flex-col items-center justify-center gap-1.5 transition">
+            <span class="text-xl">📥</span>
+            <span class="font-bold text-xs">Yedeği İndir (JSON)</span>
+          </button>
+
+          <label class="bg-surface-950 border border-slate-700 hover:border-brand-500 text-white p-3.5 rounded-2xl flex flex-col items-center justify-center gap-1.5 transition cursor-pointer">
+            <span class="text-xl">📤</span>
+            <span class="font-bold text-xs">Yedeği Yükle</span>
+            <input type="file" id="importFileInput" accept=".json" onchange="importData(event)" class="hidden">
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-surface-900 border border-slate-700 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-2xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2">
+    <span id="toastIcon">✓</span>
+    <span id="toastMessage">İşlem başarılı</span>
+  </div>
+
+  <script>
+    // Initial Curated Database (C1-C2 level collocations and high-impact tech terms)
+    const DEFAULT_CARDS = [
+      {
+        id: '1',
+        deck: 'daily',
+        word: 'Ubiquitous',
+        meaning: 'Her yerde bulunan, çok yaygın',
+        sentence: 'Smartphones have become ubiquitous in modern society.'
+      },
+      {
+        id: '2',
+        deck: 'daily',
+        word: 'Pragmatic',
+        meaning: 'Uygulamaya ve pratik faydaya odaklanan',
+        sentence: 'We need a pragmatic approach rather than theoretical debates.'
+      },
+      {
+        id: '3',
+        deck: 'daily',
+        word: 'Come up with',
+        meaning: 'Fikir veya çözüm üretmek, ortaya atmak',
+        sentence: 'Can you come up with a better alternative before Monday?'
+      },
+      {
+        id: '4',
+        deck: 'daily',
+        word: 'Deal with',
+        meaning: 'Başa çıkmak, ele almak, ilgilenmek',
+        sentence: 'I will deal with this inquiry as soon as possible.'
+      },
+      {
+        id: '5',
+        deck: 'daily',
+        word: 'Ambiguous',
+        meaning: 'Muğlak, belirsiz, birden çok anlama açık',
+        sentence: 'The instructions were ambiguous, leading to confusion.'
+      },
+      {
+        id: '6',
+        deck: 'daily',
+        word: 'Make an effort',
+        meaning: 'Gayret göstermek, çaba sarf etmek',
+        sentence: 'Consistent practice requires you to make an effort daily.'
+      },
+      {
+        id: '7',
+        deck: 'tech',
+        word: 'Mitigate',
+        meaning: 'Hafifletmek, risk ve etkiyi azaltmak',
+        sentence: 'Effective testing helps mitigate critical bugs in production.'
+      },
+      {
+        id: '8',
+        deck: 'tech',
+        word: 'Feasible',
+        meaning: 'Uygulanabilir, pratik olarak yapılabilir',
+        sentence: 'Is this technical architecture feasible for our scale?'
+      },
+      {
+        id: '9',
+        deck: 'tech',
+        word: 'Bottleneck',
+        meaning: 'Darboğaz, akışı tıkayan kritik nokta',
+        sentence: 'Database indexing solved our latency bottleneck.'
+      },
+      {
+        id: '10',
+        deck: 'tech',
+        word: 'Integrate',
+        meaning: 'Entegre etmek, uyumlu hale getirip birleştirmek',
+        sentence: 'We integrated the authentication module into the API.'
+      }
+    ];
+
+    let cards = [];
+    let currentDeck = 'all';
+    let studyList = [];
+    let studyIndex = 0;
+    let writeStreak = 0;
+    let writeCorrectCount = 0;
+    let isFlipped = false;
+    let isWaitingForNext = false;
+
+    function initApp() {
+      const saved = localStorage.getItem('vocabforge_cards_v2');
+      if (saved) {
+        try {
+          cards = JSON.parse(saved);
+        } catch (e) {
+          cards = DEFAULT_CARDS;
+        }
+      } else {
+        cards = DEFAULT_CARDS;
+        saveCards();
+      }
+      updateCounts();
+      renderCardList();
+    }
+
+    function saveCards() {
+      localStorage.setItem('vocabforge_cards_v2', JSON.stringify(cards));
+      updateCounts();
+    }
+
+    function updateCounts() {
+      document.getElementById('count-all').innerText = cards.length;
+      document.getElementById('count-daily').innerText = cards.filter(c => c.deck === 'daily').length;
+      document.getElementById('count-tech').innerText = cards.filter(c => c.deck === 'tech').length;
+    }
+
+    function switchDeck(deck) {
+      currentDeck = deck;
+      document.querySelectorAll('.deck-tab').forEach(btn => {
+        if (btn.getAttribute('data-deck') === deck) {
+          btn.className = 'deck-tab whitespace-nowrap px-4 py-2.5 rounded-2xl font-bold border transition bg-brand-600 text-white border-brand-500 shadow-md shadow-brand-600/30';
+        } else {
+          btn.className = 'deck-tab whitespace-nowrap px-4 py-2.5 rounded-2xl font-bold border transition bg-surface-900 text-slate-400 border-slate-800 hover:text-white';
+        }
+      });
+
+      const subTitles = {
+        all: 'Tüm Kartlar',
+        daily: 'Daily & Power Expressions',
+        tech: 'Tech & Systems Vocab'
+      };
+      document.getElementById('activeDeckSubtitle').innerText = subTitles[deck] || 'Tüm Kartlar';
+      renderCardList();
+    }
+
+    function renderCardList() {
+      const container = document.getElementById('cardsContainer');
+      const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+
+      let filtered = cards.filter(c => {
+        const matchesDeck = (currentDeck === 'all' || c.deck === currentDeck);
+        const matchesSearch = !search || 
+          c.word.toLowerCase().includes(search) || 
+          c.meaning.toLowerCase().includes(search);
+        return matchesDeck && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 bg-surface-900 border border-slate-800 rounded-3xl p-6">
+            <div class="text-3xl mb-2">📂</div>
+            <p class="text-xs text-slate-400">Bu kategoride kelime bulunamadı.</p>
+            <button onclick="openModal()" class="mt-3 text-xs text-brand-400 font-bold hover:underline">+ Yeni Kelime Ekle</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(card => `
+        <div class="bg-surface-900 border border-slate-800/80 hover:border-slate-700 transition p-4 rounded-3xl flex items-start justify-between gap-3 group shadow-sm">
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white text-sm font-mono tracking-tight">${card.word}</span>
+              <button onclick="speakWord('${escapeJs(card.word)}')" class="text-slate-400 hover:text-brand-400 p-0.5 rounded transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+              </button>
+              <span class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full ${card.deck === 'daily' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'}">
+                ${card.deck === 'daily' ? 'Daily' : 'Tech'}
+              </span>
+            </div>
+            <div class="text-xs text-slate-200 mt-1.5 font-medium">${card.meaning}</div>
+            ${card.sentence ? `<div class="text-[11px] text-slate-400 italic mt-1.5 border-l-2 border-brand-500/40 pl-2.5">${card.sentence}</div>` : ''}
+          </div>
+          <div class="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition">
+            <button onclick="openModal('${card.id}')" title="Düzenle" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-surface-800 transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            </button>
+            <button onclick="deleteCard('${card.id}')" title="Sil" class="p-2 text-slate-400 hover:text-rose-400 rounded-xl hover:bg-surface-800 transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function escapeJs(str) {
+      return (str || '').replace(/'/g, "\\'");
+    }
+
+    function openModal(id = null) {
+      const modal = document.getElementById('cardModal');
+      const form = document.getElementById('cardForm');
+      form.reset();
+      document.getElementById('editCardId').value = '';
+
+      if (id) {
+        const item = cards.find(c => c.id === id);
+        if (item) {
+          document.getElementById('modalTitle').innerText = 'Kelimeyi Düzenle';
+          document.getElementById('editCardId').value = item.id;
+          document.getElementById('cardDeckSelect').value = item.deck;
+          document.getElementById('cardWord').value = item.word;
+          document.getElementById('cardMeaning').value = item.meaning;
+          document.getElementById('cardSentence').value = item.sentence || '';
+        }
+      } else {
+        document.getElementById('modalTitle').innerText = 'Yeni Kelime / Kalıp Ekle';
+        if (currentDeck !== 'all') {
+          document.getElementById('cardDeckSelect').value = currentDeck;
+        }
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => document.getElementById('cardWord').focus(), 50);
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('cardModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function handleSaveCard(e) {
+      e.preventDefault();
+      const id = document.getElementById('editCardId').value;
+      const deck = document.getElementById('cardDeckSelect').value;
+      const word = document.getElementById('cardWord').value.trim();
+      const meaning = document.getElementById('cardMeaning').value.trim();
+      const sentence = document.getElementById('cardSentence').value.trim();
+
+      if (!word || !meaning) return;
+
+      if (id) {
+        cards = cards.map(c => c.id === id ? { ...c, deck, word, meaning, sentence } : c);
+        showToast('Kelime güncellendi!');
+      } else {
+        cards.unshift({
+          id: Date.now().toString(),
+          deck,
+          word,
+          meaning,
+          sentence
+        });
+        showToast('Yeni kelime eklendi!');
+      }
+
+      saveCards();
+      renderCardList();
+      closeModal();
+    }
+
+    function deleteCard(id) {
+      const item = cards.find(c => c.id === id);
+      if (!confirm(`"${item ? item.word : 'Bu kelime'}" silinsin mi?`)) return;
+      cards = cards.filter(c => c.id !== id);
+      saveCards();
+      renderCardList();
+      showToast('Kelime silindi.');
+    }
+
+    // STUDY LOGIC
+    function startMode(mode) {
+      studyList = cards.filter(c => currentDeck === 'all' || c.deck === currentDeck);
+      if (studyList.length === 0) {
+        showToast('Bu listede çalışacak kelime yok!');
+        return;
+      }
+
+      studyList = [...studyList].sort(() => Math.random() - 0.5);
+      studyIndex = 0;
+
+      document.getElementById('viewCardList').classList.add('hidden');
+
+      if (mode === 'write') {
+        writeStreak = 0;
+        writeCorrectCount = 0;
+        isWaitingForNext = false;
+        document.getElementById('writeStreak').innerText = '0';
+        document.getElementById('writeCorrectCount').innerText = '0';
+        document.getElementById('viewWriteMode').classList.remove('hidden');
+        document.getElementById('viewFlashcardMode').classList.add('hidden');
+        loadWriteQuestion();
+      } else if (mode === 'flashcard') {
+        isFlipped = false;
+        document.getElementById('cardInner').classList.remove('rotate-y-180');
+        document.getElementById('viewFlashcardMode').classList.remove('hidden');
+        document.getElementById('viewWriteMode').classList.add('hidden');
+        loadFlashcard();
+      }
+    }
+
+    function exitModes() {
+      document.getElementById('viewWriteMode').classList.add('hidden');
+      document.getElementById('viewFlashcardMode').classList.add('hidden');
+      document.getElementById('viewCardList').classList.remove('hidden');
+      renderCardList();
+    }
+
+    function loadWriteQuestion() {
+      if (studyIndex >= studyList.length) {
+        finishStudySession();
+        return;
+      }
+
+      isWaitingForNext = false;
+      const cur = studyList[studyIndex];
+      document.getElementById('writeProgressText').innerText = `${studyIndex + 1} / ${studyList.length}`;
+      document.getElementById('writePromptMeaning').innerText = cur.meaning;
+      document.getElementById('writePromptSentence').innerText = cur.sentence 
+        ? `"${cur.sentence.replace(new RegExp(cur.word, 'gi'), '_____')}"`
+        : 'İngilizce karşılığını yazınız.';
+
+      const input = document.getElementById('writeInput');
+      input.value = '';
+      input.disabled = false;
+      input.className = 'w-full bg-surface-950 border-2 border-slate-700 focus:border-brand-500 rounded-2xl py-3.5 px-4 text-center font-mono text-base font-semibold text-white placeholder:text-slate-600 focus:outline-none transition shadow-inner';
+      input.focus();
+
+      document.getElementById('writeFeedbackBox').classList.add('hidden');
+      document.getElementById('btnWriteSubmit').classList.remove('hidden');
+    }
+
+    function handleWriteSubmit(e) {
+      if (e) e.preventDefault();
+      if (isWaitingForNext) {
+        nextWriteQuestion();
+        return;
+      }
+
+      const input = document.getElementById('writeInput');
+      const userAnswer = input.value.trim().toLowerCase();
+      const current = studyList[studyIndex];
+      const correctAnswer = current.word.trim();
+
+      const isCorrect = userAnswer === correctAnswer.toLowerCase();
+      input.disabled = true;
+      document.getElementById('btnWriteSubmit').classList.add('hidden');
+
+      const feedbackBox = document.getElementById('writeFeedbackBox');
+      const badge = document.getElementById('writeFeedbackBadge');
+      const answerDisplay = document.getElementById('writeCorrectAnswerDisplay');
+
+      answerDisplay.innerText = correctAnswer;
+
+      if (isCorrect) {
+        writeStreak++;
+        writeCorrectCount++;
+        input.className = 'w-full bg-emerald-950/40 border-2 border-emerald-500 rounded-2xl py-3.5 px-4 text-center font-mono text-base font-bold text-emerald-300';
+        feedbackBox.className = 'w-full mt-4 p-4 rounded-2xl transition-all duration-300 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300';
+        badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono mb-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        badge.innerHTML = '✓ HARİKA! TAM DOĞRU';
+        speakWord(correctAnswer);
+      } else {
+        writeStreak = 0;
+        input.className = 'w-full bg-rose-950/40 border-2 border-rose-500 rounded-2xl py-3.5 px-4 text-center font-mono text-base font-bold text-rose-300';
+        feedbackBox.className = 'w-full mt-4 p-4 rounded-2xl transition-all duration-300 bg-rose-500/10 border border-rose-500/30 text-rose-300';
+        badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono mb-2 bg-rose-500/20 text-rose-300 border border-rose-500/30';
+        badge.innerHTML = '✕ DİKKAT! YAZIM HATASI';
+      }
+
+      document.getElementById('writeStreak').innerText = writeStreak;
+      document.getElementById('writeCorrectCount').innerText = writeCorrectCount;
+      feedbackBox.classList.remove('hidden');
+      isWaitingForNext = true;
+      document.getElementById('btnWriteNext').focus();
+    }
+
+    function nextWriteQuestion() {
+      studyIndex++;
+      loadWriteQuestion();
+    }
+
+    function loadFlashcard() {
+      if (studyIndex >= studyList.length) {
+        finishStudySession();
+        return;
+      }
+      isFlipped = false;
+      document.getElementById('cardInner').classList.remove('rotate-y-180');
+
+      const cur = studyList[studyIndex];
+      document.getElementById('cardProgressText').innerText = `${studyIndex + 1} / ${studyList.length}`;
+      document.getElementById('cardFrontWord').innerText = cur.word;
+      document.getElementById('cardBackMeaning').innerText = cur.meaning;
+      document.getElementById('cardBackSentence').innerText = cur.sentence 
+        ? `"${cur.sentence}"` 
+        : 'Örnek cümle eklenmedi.';
+    }
+
+    function toggleCardFlip() {
+      isFlipped = !isFlipped;
+      const inner = document.getElementById('cardInner');
+      if (isFlipped) {
+        inner.classList.add('rotate-y-180');
+      } else {
+        inner.classList.remove('rotate-y-180');
+      }
+    }
+
+    function nextFlashcard() {
+      if (studyIndex < studyList.length - 1) {
+        studyIndex++;
+        loadFlashcard();
+      } else {
+        finishStudySession();
+      }
+    }
+
+    function prevFlashcard() {
+      if (studyIndex > 0) {
+        studyIndex--;
+        loadFlashcard();
+      }
+    }
+
+    function finishStudySession() {
+      showToast('🎉 Tebrikler! Seansı başarıyla tamamladınız.');
+      exitModes();
+    }
+
+    function playCurrentAudio() {
+      if (studyList[studyIndex]) {
+        speakWord(studyList[studyIndex].word);
+      }
+    }
+
+    function speakWord(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // BACKUP & RESTORE (Export/Import JSON)
+    function openBackupModal() {
+      document.getElementById('backupModal').classList.remove('hidden');
+      document.getElementById('backupModal').classList.add('flex');
+    }
+
+    function closeBackupModal() {
+      document.getElementById('backupModal').classList.add('hidden');
+      document.getElementById('backupModal').classList.remove('flex');
+    }
+
+    function exportData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cards, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `vocabforge_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('Kelimeler JSON dosyası olarak indirildi.');
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            cards = imported;
+            saveCards();
+            renderCardList();
+            closeBackupModal();
+            showToast('Kelimeler başarıyla yüklendi!');
+          } else {
+            showToast('Hatalı dosya formatı.');
+          }
+        } catch (err) {
+          showToast('Dosya okunamadı.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // DEPLOY MODAL GUIDE
+    function openDeployModal() {
+      document.getElementById('deployModal').classList.remove('hidden');
+      document.getElementById('deployModal').classList.add('flex');
+    }
+
+    function closeDeployModal() {
+      document.getElementById('deployModal').classList.add('hidden');
+      document.getElementById('deployModal').classList.remove('flex');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').innerText = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 2500);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (isWaitingForNext && (e.key === 'Enter' || e.code === 'Space')) {
+        e.preventDefault();
+        nextWriteQuestion();
+      }
+    });
+
+    window.onload = () => {
+      initApp();
+      switchDeck('all');
+    };
+  </script>
+</body>
+</html>
