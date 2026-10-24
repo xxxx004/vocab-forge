@@ -2,589 +2,400 @@
 <html lang="tr" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VocabForge</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-          },
-          colors: {
-            slate: {
-              850: '#0f172a',
-              900: '#0b1120',
-              950: '#060913',
-            }
-          }
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] }
         }
       }
     }
   </script>
   <style>
-    .perspective { perspective: 1000px; }
-    .transform-style-3d { transform-style: preserve-3d; }
-    .backface-hidden { backface-visibility: hidden; }
-    .rotate-y-180 { transform: rotateY(180deg); }
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #0b1120; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+    body { background-color: #020617; color: #f8fafc; }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-blue-600 selection:text-white">
-
-  <!-- Üst Başlık (Sabit Değil, Kaydırınca Gider) -->
-  <header id="mainHeader" class="w-full max-w-4xl mx-auto px-4 py-4 flex items-center justify-between border-b border-slate-800/40">
-  <div class="flex items-center gap-2.5">
-      <span class="text-xl font-bold bg-gradient-to-r from-blue-400 via-indigo-300 to-sky-400 bg-clip-text text-transparent">VocabForge</span>
-      <span id="activeBadge" class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">Tümü</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <button onclick="openModal('backupModal')" class="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-900 border border-slate-800 transition" title="Yedekle / Cihazlar Arası Aktar">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
-      </button>
-      <button onclick="openModal('addModal')" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-3 py-1.5 rounded-lg shadow-sm transition">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        <span>Ekle</span>
-      </button>
-    </div>
-  </header>
-
-  <!-- Ana Taşıyıcı -->
+<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-blue-500/30">
+  
   <main class="flex-1 w-full max-w-4xl mx-auto px-4 py-6 flex flex-col gap-6">
-
     <!-- Ana Kontrol Paneli -->
     <div id="mainView" class="flex flex-col gap-6">
+      
+      <div class="flex items-center gap-2">
+        <span class="text-xl font-bold bg-gradient-to-r from-blue-400 via-indigo-300 to-sky-400 bg-clip-text text-transparent">VocabForge</span>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button onclick="document.getElementById('addModal').classList.remove('hidden')" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition shadow-lg shadow-blue-500/20 text-sm flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Ekle
+        </button>
+      </div>
 
       <!-- Kategori Seçimi -->
-     <!-- Kategori Seçimi (Otomatik) -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-        <button onclick="filterCategory('all')" id="tab-all" class="px-4 py-2 rounded-xl text-s
+      <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <button onclick="filterCategory('all')" id="tab-all" class="px-4 py-2 rounded-xl text-sm font-medium bg-blue-600 text-white transition flex-shrink-0">
           Tümü (<span id="count-all">0</span>)
         </button>
-        <button onclick="filterCategory('daily')" id="tab-daily" class="px-4 py-2 rounded-xl te
+        <button onclick="filterCategory('daily')" id="tab-daily" class="px-4 py-2 rounded-xl text-sm font-medium bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex-shrink-0">
           ⚡ Daily & Power (<span id="count-daily">0</span>)
         </button>
-        <button onclick="filterCategory('tech')" id="tab-tech" class="px-4 py-2 rounded-xl text
+        <button onclick="filterCategory('tech')" id="tab-tech" class="px-4 py-2 rounded-xl text-sm font-medium bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex-shrink-0">
           ⚙ Tech & Systems (<span id="count-tech">0</span>)
         </button>
       </div>
 
       <!-- Çalışma Modu Kartları -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Yazarak Ezberle Modu -->
-        <div onclick="startTypingMode()" class="cursor-pointer group relative bg-gradient-to-br from-slate-900 to-slate-850 p-6 rounded-2xl border border-slate-800 hover:border-blue-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10">
+        <div onclick="startTypingMode()" class="cursor-pointer group relative bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 hover:border-blue-500/50 rounded-2xl p-5 transition-all overflow-hidden">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-3xl">✍️</span>
-            <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">Klavyeli Mod</span>
+            <span class="text-2xl group-hover:scale-110 transition-transform">✍️</span>
+            <span class="text-xs font-bold px-2 py-1 bg-blue-500/20 text-blue-400 rounded-lg">Klavyeli Mod</span>
           </div>
-          <h3 class="text-lg font-bold text-white group-hover:text-blue-400 transition mb-1">Yazarak Ezberle</h3>
-          <p class="text-sm text-slate-400 leading-relaxed">Türkçe karşılığı gör, İngilizcesini klavyeyle yaz ve anında doğrula.</p>
+          <h3 class="font-bold text-white mb-1">Yazarak Ezberle</h3>
+          <p class="text-sm text-slate-400">Türkçe karşılığı gör, İngilizcesini klavyeyle yaz ve anında doğrula.</p>
         </div>
 
-        <!-- Klasik Kart Çevir Modu -->
-        <div onclick="startFlashcardMode()" class="cursor-pointer group relative bg-gradient-to-br from-slate-900 to-slate-850 p-6 rounded-2xl border border-slate-800 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/10">
+        <div class="cursor-pointer group relative bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 hover:border-indigo-500/50 rounded-2xl p-5 transition-all overflow-hidden opacity-50">
           <div class="flex items-center justify-between mb-3">
-            <span class="text-3xl">🃏</span>
-            <span class="text-xs font-semibold px-2.5 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">Hızlı Kartlar</span>
+            <span class="text-2xl group-hover:scale-110 transition-transform">📇</span>
+            <span class="text-xs font-bold px-2 py-1 bg-slate-800 text-slate-400 rounded-lg">Yakında</span>
           </div>
-          <h3 class="text-lg font-bold text-white group-hover:text-indigo-400 transition mb-1">Kart Çevir & Dinle</h3>
-          <p class="text-sm text-slate-400 leading-relaxed">Ön/arka yüz çevirerek telaffuzla hızlı tekrar yap.</p>
+          <h3 class="font-bold text-white mb-1">Kart Çevir & Dinle</h3>
+          <p class="text-sm text-slate-400">Ön/arka yüz çevirerek telaffuzla hızlı tekrar yap.</p>
         </div>
       </div>
 
-      <!-- Kayıtlı Kelimeler Listesi & Arama -->
-      <section class="flex flex-col gap-3">
-        <div class="flex items-center justify-between gap-4">
-          <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">Kayıtlı Kelimeler & Kalıplar</h2>
-          <div class="relative w-48 sm:w-64">
-            <input type="text" id="searchInput" oninput="renderWordList()" placeholder="Kelimelerde ara..." class="w-full bg-slate-900 text-sm border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 focus:outline-none focus:border-blue-500 text-slate-200">
-            <svg class="w-4 h-4 text-slate-500 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          </div>
+      <!-- Liste Başlığı ve Arama -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
+        <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Kayıtlı Kelimeler & Kalıplar</h2>
+        <div class="relative w-full sm:w-64">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" id="searchInput" onkeyup="renderWordList()" placeholder="Kelimelerde ara..." class="w-full bg-slate-900 border border-slate-800 text-sm rounded-xl pl-9 pr-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition">
         </div>
+      </div>
 
-        <div id="wordListContainer" class="flex flex-col gap-2.5">
-          <!-- Dinamik Kelimeler Buraya Gelecek -->
-        </div>
-      </section>
-
+      <!-- Kelime Listesi -->
+      <div id="wordList" class="flex flex-col gap-3"></div>
     </div>
 
-    <!-- Çalışma Ekranı (Practice Container) -->
-    <div id="practiceContainer" class="hidden flex-1 flex flex-col justify-center items-center py-4">
+    <!-- Typing Modu Paneli -->
+    <div id="typingView" class="hidden flex-col items-center justify-center min-h-[70vh] gap-6">
+      <button onclick="exitTypingMode()" class="self-start text-slate-400 hover:text-white flex items-center gap-2 transition mb-4">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg> Listeye Dön
+      </button>
       
-      <!-- Çıkış ve İlerleme Başlığı -->
-      <div class="w-full flex items-center justify-between mb-6">
-        <button onclick="closePractice()" class="text-slate-400 hover:text-white p-2 rounded-lg bg-slate-900 border border-slate-800 transition flex items-center gap-1.5 text-sm">
-          <span>✕</span>
-          <span>Çıkış</span>
-        </button>
-        <div class="flex items-center gap-3">
-          <span id="practiceProgress" class="text-sm font-semibold text-slate-400">1 / 10</span>
-          <div id="streakCounter" class="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full">
-            <span>🔥</span>
-            <span id="streakCount">0</span>
-          </div>
+      <div class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-slate-800">
+          <div id="typeProgress" class="h-full bg-blue-500 transition-all duration-300 w-0"></div>
+        </div>
+        
+        <div class="flex justify-between items-center mb-8">
+          <span id="typeStats" class="text-sm font-semibold text-slate-400 bg-slate-950 px-3 py-1 rounded-lg border border-slate-800">0 / 0</span>
+          <span id="streakBadge" class="hidden text-sm font-bold text-amber-400 bg-amber-400/10 px-3 py-1 rounded-lg border border-amber-400/20">🔥 3 Streak!</span>
+        </div>
+
+        <div class="text-center mb-8">
+          <p class="text-sm text-slate-500 font-medium mb-2 uppercase tracking-widest">TÜRKÇE ANLAMI</p>
+          <h2 id="typeMeaning" class="text-3xl font-bold text-white mb-2 leading-tight">Anlam</h2>
+          <p id="typeContext" class="text-sm text-slate-400 italic">"Örnek cümle..."</p>
+        </div>
+
+        <div class="relative">
+          <input type="text" id="typeInput" autocomplete="off" placeholder="İngilizcesini yaz..." class="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl px-6 py-4 text-center text-xl text-white font-medium focus:outline-none focus:border-blue-500 transition placeholder-slate-600 shadow-inner">
+          <p id="typeFeedback" class="absolute -bottom-8 left-0 w-full text-center text-sm font-bold opacity-0 transition-opacity"></p>
         </div>
       </div>
-
-      <!-- 1. YAZARAK EZBERLEME PANELİ -->
-      <div id="typingView" class="w-full max-w-lg flex flex-col items-center">
-        <div class="w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center shadow-xl">
-          
-          <span class="text-xs font-semibold px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full mb-3 uppercase tracking-wider">İngilizcesini Yaz</span>
-          
-          <!-- Türkçe Tanım -->
-          <h2 id="typingPromptTR" class="text-xl sm:text-2xl font-bold text-white mb-2 leading-snug">--</h2>
-          <p id="typingContext" class="text-sm text-slate-400 italic mb-6">--</p>
-
-          <!-- Input Alanı -->
-          <form onsubmit="handleTypingSubmit(event)" class="w-full flex flex-col gap-3">
-            <input type="text" id="typingInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Cevabı buraya yaz..." class="w-full bg-slate-950 border-2 border-slate-750 focus:border-blue-500 rounded-xl px-4 py-3.5 text-center text-lg font-medium text-white tracking-wide focus:outline-none transition">
-            <button type="submit" id="typingSubmitBtn" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-blue-600/20 transition">
-              Cevabı Gönder (Enter)
-            </button>
-          </form>
-
-          <!-- Sonuç & Feedback Kutusu -->
-          <div id="typingFeedback" class="hidden mt-6 w-full flex flex-col items-center gap-3 p-4 rounded-xl border">
-            <div id="feedbackMessage" class="font-bold text-base"></div>
-            <div id="correctWordBox" class="text-sm text-slate-300">
-              Doğru Cevap: <span id="correctWordText" class="font-bold text-white"></span>
-            </div>
-            <button id="listenFeedbackBtn" onclick="speakCurrentWord()" class="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 py-1 px-3 bg-blue-500/10 rounded-full transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
-              <span>Telaffuzu Dinle</span>
-            </button>
-            <button id="nextQuestionBtn" onclick="nextTypingWord()" class="mt-2 w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-2.5 rounded-lg text-sm transition">
-              Sıradaki Soru (Enter) →
-            </button>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- 2. KART ÇEVİRME PANELİ -->
-      <div id="flashcardView" class="hidden w-full max-w-md flex flex-col items-center">
-        <div onclick="flipCard()" class="perspective w-full h-80 cursor-pointer">
-          <div id="cardInner" class="transform-style-3d relative w-full h-full duration-500 rounded-3xl border border-slate-800 shadow-2xl bg-slate-900">
-            
-            <!-- Ön Yüz (İngilizce) -->
-            <div class="backface-hidden absolute inset-0 p-8 flex flex-col justify-between items-center text-center">
-              <span class="text-xs font-semibold px-3 py-1 bg-slate-800 text-slate-300 rounded-full">İngilizce İfade</span>
-              <div class="flex flex-col items-center gap-2">
-                <h2 id="cardFrontText" class="text-3xl font-extrabold text-white tracking-wide">--</h2>
-                <button onclick="event.stopPropagation(); speakCardWord();" class="mt-2 p-2 rounded-full bg-slate-800 text-slate-300 hover:text-white transition">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-6-3H4a1 1 0 01-1-1v-4a1 1 0 011-1h2l4-4v14l-4-4z"/></svg>
-                </button>
-              </div>
-              <span class="text-xs text-slate-500">Türkçe karşılığı için dokun ↻</span>
-            </div>
-
-            <!-- Arka Yüz (Türkçe) -->
-            <div class="backface-hidden rotate-y-180 absolute inset-0 p-8 flex flex-col justify-between items-center text-center bg-slate-900 rounded-3xl">
-              <span class="text-xs font-semibold px-3 py-1 bg-blue-500/10 text-blue-400 rounded-full">Türkçe Karşılık</span>
-              <div class="flex flex-col items-center gap-3">
-                <h2 id="cardBackText" class="text-2xl font-bold text-white">--</h2>
-                <p id="cardBackExample" class="text-sm text-slate-400 italic">--</p>
-              </div>
-              <span class="text-xs text-slate-500">Ön yüze dönmek için dokun ↻</span>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- Kart Değiştirme Butonları -->
-        <div class="flex items-center gap-4 mt-6">
-          <button onclick="prevCard()" class="px-5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-300 hover:text-white transition">← Önceki</button>
-          <button onclick="nextCard()" class="px-5 py-2.5 bg-blue-600 rounded-xl text-white font-semibold shadow-lg shadow-blue-600/20 hover:bg-blue-500 transition">Sonraki →</button>
-        </div>
-      </div>
-
     </div>
-
   </main>
 
-  <!-- MODAL: KELİME EKLE -->
-  <div id="addModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-white">Yeni Kelime / Kalıp Ekle</h3>
-        <button onclick="closeModal('addModal')" class="text-slate-400 hover:text-white">✕</button>
+  <!-- Ekleme Modalı -->
+  <div id="addModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold text-white">Yeni Kelime Ekle</h3>
+        <button onclick="document.getElementById('addModal').classList.add('hidden')" class="text-slate-500 hover:text-white transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
       </div>
       <form onsubmit="handleSaveWord(event)" class="flex flex-col gap-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Kategori</label>
-          <select id="modalCategory" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+          <label class="block text-sm font-medium text-slate-400 mb-1 ml-1">İngilizce Kelime / Kalıp *</label>
+          <input type="text" id="inpTerm" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-400 mb-1 ml-1">Türkçe Anlamı *</label>
+          <input type="text" id="inpMeaning" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-400 mb-1 ml-1">Örnek Cümle (İsteğe Bağlı)</label>
+          <input type="text" id="inpExample" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-400 mb-1 ml-1">Kategori</label>
+          <select id="inpCategory" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition appearance-none">
             <option value="daily">⚡ Daily & Power Expressions</option>
             <option value="tech">⚙️ Tech & Systems Vocab</option>
           </select>
         </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">İngilizce Kelime / Kalıp *</label>
-          <input type="text" id="modalTerm" required placeholder="örn: Ubiquitous" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Türkçe Anlamı *</label>
-          <input type="text" id="modalMeaning" required placeholder="örn: Her yerde bulunan, yaygın" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Örnek Cümle / Bağlam</label>
-          <textarea id="modalExample" rows="2" placeholder="örn: Microcontrollers are ubiquitous in modern vehicles." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"></textarea>
-        </div>
-        <div class="flex items-center justify-end gap-2 mt-2">
-          <button type="button" onclick="closeModal('addModal')" class="px-4 py-2 text-sm text-slate-400 hover:text-white">İptal</button>
-          <button type="submit" class="px-5 py-2 text-sm bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg shadow-md transition">Kaydet</button>
-        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl py-3 mt-2 transition">Kaydet</button>
       </form>
     </div>
   </div>
 
-  <!-- MODAL: YEDEKLE & İÇE AKTAR -->
-  <div id="backupModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl flex flex-col gap-4">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold text-white">Yedekle / Cihazlar Arası Aktar</h3>
-        <button onclick="closeModal('backupModal')" class="text-slate-400 hover:text-white">✕</button>
-      </div>
-      <p class="text-xs text-slate-400 leading-relaxed">
-        Kelimelerini başka bir telefona veya bilgisayara aktarmak için tek tıkla dosya olarak indirebilir ya da yükleyebilirsin.
-      </p>
-      <div class="flex flex-col gap-2 pt-2">
-        <button onclick="exportData()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition">
-          <span>📥</span> Yedeği İndir (JSON)
-        </button>
-        <label class="w-full py-2.5 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-300 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer transition">
-          <span>📤</span> Yedeği Yükle
-          <input type="file" id="importFileInput" onchange="importData(event)" accept=".json" class="hidden">
-        </label>
-      </div>
-    </div>
-  </div>
-
-  <!-- UYGULAMA JAVASCRIPT ÇEKİRDEĞİ -->
   <script>
-    // Başlangıç Varsayılan Kelimeleri
-    const defaultWords = [
-      { id: 1, term: "Ubiquitous", meaning: "Heryerde bulunan, çok yaygın", category: "daily", example: "Smartphones have become ubiquitous in modern society." },
-      { id: 2, term: "Pragmatic", meaning: "Uygulamaya ve pratik faydaya odaklanan", category: "daily", example: "We need a pragmatic approach rather than theoretical debates." },
-      { id: 3, term: "Come up with", meaning: "Fikir veya çözüm üretmek, ortaya atmak", category: "daily", example: "Can you come up with a better alternative before Monday?" },
-      { id: 4, term: "Deal with", meaning: "Üstesinden gelmek, başa çıkmak, ele almak", category: "daily", example: "Engineers deal with critical constraints every single day." },
-      { id: 5, term: "Figure out", meaning: "Çözmek, anlamak, akıl erdirmek", category: "daily", example: "I will figure out why the battery voltage is dropping." },
-      { id: 6, term: "Make an effort", meaning: "Çaba göstermek, gayret sarf etmek", category: "daily", example: "She made an effort to finish the technical report on time." },
-      { id: 7, term: "Fault tolerance", meaning: "Hata toleransı, arıza dayanımı", category: "tech", example: "Redundant power buses guarantee high fault tolerance." },
-      { id: 8, term: "Throughput", meaning: "Birim zamanda aktarılan iş veya veri miktarı", category: "tech", example: "CAN FD delivers significantly higher throughput than classic CAN." },
-      { id: 9, term: "State of Charge", meaning: "Bataryanın doluluk oranı (SoC)", category: "tech", example: "The BMS continuously monitors the battery pack's state of charge." },
-      { id: 10, term: "Power stage", meaning: "Güç katı / sürücü devresi", category: "tech", example: "The MOSFET power stage drives the high-current brushless motor." }
-    ];
-
-    // LocalStorage Yönetimi
-    // İstediğin kadar kategori ekle, sistem butonları ve başlığı otomatik üretir
-    let words = JSON.parse(localStorage.getItem('vocab_forge_words')) || defaultWords;
+    let words = JSON.parse(localStorage.getItem('vocabForge_data')) || [];
     let currentFilter = 'all';
-    let practiceList = [];
-    let currentIndex = 0;
-    let currentStreak = 0;
-    let isFlipped = false;
 
     function saveWords() {
-      localStorage.setItem('vocab_forge_words', JSON.stringify(words));
-      updateCounts();
-      renderWordList();
+      localStorage.setItem('vocabForge_data', JSON.stringify(words));
     }
-
-    function updateCounts() {
-      try {
-        document.getElementById('count-all')?.replaceChildren(words.length);
-        document.getElementById('count-daily')?.replaceChildren(words.filter(w => w.category === 'daily').length);
-        document.getElementById('count-tech')?.replaceChildren(words.filter(w => w.category === 'tech').length);
-      } catch (e) {}
-    }
-
-   
-   function filterCategory(cat) {
-      currentFilter = cat;
-      ['all', 'daily', 'tech'].forEach(c => {
-        const btn = document.getElementById(`tab-${c}`);
-        if(c === cat) {
-          btn.className = "px-4 py-2 rounded-xl text-sm font-medium bg-blue-600 text-white transition flex-shrink-0";
-        } else {
-          btn.className = "px-4 py-2 rounded-xl text-sm font-medium bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex-shrink-0";
-        }
-      });
-
-      // Butonda ne yazıyorsa rozette de birebir o yazsın
-      const badge = document.getElementById('activeBadge');
-      if (cat === 'all') {
-        badge.innerText = "Tümü";
-        badge.className = "text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20";
-      } else if (cat === 'daily') {
-        badge.innerText = "Daily & Power";
-        badge.className = "text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20";
-      } else if (cat === 'tech') {
-        badge.innerText = "Tech & Systems";
-        badge.className = "text-xs font-medium px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20";
-      }
-
-      renderWordList();
-    }
-
-    function deleteWord(id) {
-      if(confirm('Bu kelimeyi silmek istediğine emin misin?')) {
-        words = words.filter(w => w.id !== id);
-        saveWords();
-      }
-    }
-
-    // Modal Fonksiyonları
-    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
     function handleSaveWord(e) {
       e.preventDefault();
-      const term = document.getElementById('modalTerm').value.trim();
-      const meaning = document.getElementById('modalMeaning').value.trim();
-      const example = document.getElementById('modalExample').value.trim();
-      const category = document.getElementById('modalCategory').value;
+      const term = document.getElementById('inpTerm').value.trim();
+      const meaning = document.getElementById('inpMeaning').value.trim();
+      const example = document.getElementById('inpExample').value.trim();
+      const category = document.getElementById('inpCategory').value;
 
-      if(!term || !meaning) return;
-
-      words.unshift({
-        id: Date.now(),
-        term,
-        meaning,
-        example,
-        category,
-        level: 1
-      });
-
-      saveWords();
-      closeModal('addModal');
-      document.getElementById('modalTerm').value = '';
-      document.getElementById('modalMeaning').value = '';
-      document.getElementById('modalExample').value = '';
-    }
-
-    // TELAFUZ FONKSİYONU
-    function speakText(text) {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
-        utterance.rate = 0.9;
-        window.speechSynthesis.speak(utterance);
+      if(term && meaning) {
+        words.unshift({
+          id: Date.now(),
+          term,
+          meaning,
+          example,
+          category,
+          level: 1 // Yeni kelimeler doğrudan 1 yıldız (seviye 1) ile başlar
+        });
+        saveWords();
+        document.getElementById('addModal').classList.add('hidden');
+        e.target.reset();
+        renderWordList();
       }
     }
 
-    // ÇALIŞMA MODLARI YÖNETİMİ
-    function getActiveList() {
-      const active = words.filter(w => currentFilter === 'all' || w.category === currentFilter);
-      return active.length > 0 ? active : words;
+    function deleteWord(id) {
+      if(confirm("Bu kelimeyi silmek istediğine emin misin?")) {
+        words = words.filter(w => w.id !== id);
+        saveWords();
+        renderWordList();
+      }
     }
 
-    function enterPracticeMode() {
-      document.getElementById('mainHeader').classList.add('hidden');
-      document.getElementById('mainView').classList.add('hidden');
-      document.getElementById('practiceContainer').classList.remove('hidden');
+    // Telaffuz hatasını önleyen en güvenli yöntem
+    function speakText(btnElement) {
+      const text = btnElement.getAttribute('data-term');
+      if(!text) return;
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US';
+      speechSynthesis.speak(u);
     }
 
-    function closePractice() {
-      document.getElementById('mainHeader').classList.remove('hidden');
-      document.getElementById('practiceContainer').classList.add('hidden');
-      document.getElementById('mainView').classList.remove('hidden');
-      updateCounts();
+    function filterCategory(cat) {
+      currentFilter = cat;
+      ['all', 'daily', 'tech'].forEach(c => {
+        const btn = document.getElementById(`tab-${c}`);
+        if(btn) {
+          if(c === cat) {
+            btn.className = "px-4 py-2 rounded-xl text-sm font-medium bg-blue-600 text-white transition flex-shrink-0";
+          } else {
+            btn.className = "px-4 py-2 rounded-xl text-sm font-medium bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex-shrink-0";
+          }
+        }
+      });
       renderWordList();
     }
 
-    // 1. KLAVYELİ YAZARAK EZBERLEME MODU
+    // Sayaçları güncelleyen güvenli fonksiyon (hata vermez)
+    function updateCounts() {
+      const cAll = document.getElementById('count-all');
+      const cDaily = document.getElementById('count-daily');
+      const cTech = document.getElementById('count-tech');
+      
+      if(cAll) cAll.innerText = words.length;
+      if(cDaily) cDaily.innerText = words.filter(w => w.category === 'daily').length;
+      if(cTech) cTech.innerText = words.filter(w => w.category === 'tech').length;
+    }
+
+    function renderWordList() {
+      updateCounts(); 
+      
+      const container = document.getElementById('wordList');
+      const searchTxt = document.getElementById('searchInput')?.value.toLowerCase() || '';
+      if(!container) return;
+
+      let filtered = words;
+      if(currentFilter !== 'all') {
+        filtered = words.filter(w => w.category === currentFilter);
+      }
+      if(searchTxt) {
+        filtered = filtered.filter(w => w.term.toLowerCase().includes(searchTxt) || w.meaning.toLowerCase().includes(searchTxt));
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-slate-500 text-sm bg-slate-900/50 rounded-2xl border border-slate-800">Kelime bulunamadı.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => `
+        <div class="bg-slate-900 border border-slate-800/80 rounded-xl p-4 flex items-start justify-between gap-3 hover:border-slate-700 transition group">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="font-bold text-white tracking-wide">${item.term}</span>
+              
+              <!-- YILDIZ GÖSTERİMİ BURADA -->
+              <span class="text-xs text-amber-400 font-mono">${"⭐".repeat(item.level || 1)}</span>
+              
+              <button onclick="speakText(this)" data-term="${item.term.replace(/"/g, '&quot;')}" class="text-slate-400 hover:text-blue-400 p-0.5" title="Dinle">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-6-3H4a1 1 0 01-1-1v-4a1 1 0 011-1h2l4-4v14l-4-4z"/></svg>
+              </button>
+              
+              <span class="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full ${item.category === 'daily' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'}">
+                ${item.category === 'daily' ? 'Daily' : 'Tech'}
+              </span>
+            </div>
+            <p class="text-sm text-slate-300 mb-1">${item.meaning}</p>
+            ${item.example ? `<p class="text-xs text-slate-400 italic">"${item.example}"</p>` : ''}
+          </div>
+          <button onclick="deleteWord(${item.id})" class="text-slate-500 hover:text-rose-400 p-1.5 transition opacity-0 group-hover:opacity-100" title="Sil">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    let practiceList = [];
+    let currentIdx = 0;
+    let currentStreak = 0;
+    let isAnswered = false;
+
+    function getActiveList() {
+      if (currentFilter === 'all') return words;
+      return words.filter(w => w.category === currentFilter);
+    }
+
     function startTypingMode() {
-      practiceList = [...getActiveList()].sort((a, b) => {
+      const active = getActiveList();
+      if (active.length === 0) {
+        alert("Bu kategoride kelime yok!");
+        return;
+      }
+      
+      // Yıldızı az olanları (zorlanılanları) öne getirme algoritması
+      practiceList = [...active].sort((a, b) => {
         const lvlA = a.level || 1;
         const lvlB = b.level || 1;
         return (lvlA - lvlB) + (Math.random() - 0.5);
       });
-      if(practiceList.length === 0) return alert('Çalışmak için önce bir kelime ekle.');
-      
-      currentIndex = 0;
+
+      currentIdx = 0;
       currentStreak = 0;
-      document.getElementById('streakCount').innerText = currentStreak;
-      document.getElementById('flashcardView').classList.add('hidden');
+      document.getElementById('mainView').classList.add('hidden');
       document.getElementById('typingView').classList.remove('hidden');
-      enterPracticeMode();
-      loadTypingWord();
-    }
-
-    function loadTypingWord() {
-      const current = practiceList[currentIndex];
-      document.getElementById('practiceProgress').innerText = `${currentIndex + 1} / ${practiceList.length}`;
-      document.getElementById('typingPromptTR').innerText = current.meaning;
-      document.getElementById('typingContext').innerText = current.example ? `"${current.example}"` : '';
+      document.getElementById('typingView').classList.add('flex');
       
-      const input = document.getElementById('typingInput');
-      input.value = '';
-      input.disabled = false;
-      input.className = "w-full bg-slate-950 border-2 border-slate-750 focus:border-blue-500 rounded-xl px-4 py-3.5 text-center text-lg font-medium text-white tracking-wide focus:outline-none transition";
-      input.focus();
-
-      document.getElementById('typingFeedback').classList.add('hidden');
-      document.getElementById('typingSubmitBtn').classList.remove('hidden');
+      const inp = document.getElementById('typeInput');
+      inp.value = '';
+      inp.addEventListener('keyup', handleTypingSubmit);
+      
+      updateTypingUI();
+      inp.focus();
     }
 
-    function normalizeText(str) {
-      return str.trim().toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g,"");
+    function exitTypingMode() {
+      document.getElementById('typingView').classList.remove('flex');
+      document.getElementById('typingView').classList.add('hidden');
+      document.getElementById('mainView').classList.remove('hidden');
+      document.getElementById('typeInput').removeEventListener('keyup', handleTypingSubmit);
+      
+      // Kazanılan yıldızları yansıtmak için listeyi güncelle
+      renderWordList();
+    }
+
+    function updateTypingUI() {
+      if (currentIdx >= practiceList.length) {
+        alert("Tebrikler! Bu kategorideki tüm kelimeleri tamamladın.");
+        exitTypingMode();
+        return;
+      }
+
+      isAnswered = false;
+      const current = practiceList[currentIdx];
+      document.getElementById('typeMeaning').innerText = current.meaning;
+      document.getElementById('typeContext').innerText = current.example ? `"${current.example}"` : "";
+      
+      document.getElementById('typeStats').innerText = `${currentIdx + 1} / ${practiceList.length}`;
+      document.getElementById('typeProgress').style.width = `${(currentIdx / practiceList.length) * 100}%`;
+      
+      const sb = document.getElementById('streakBadge');
+      if (currentStreak >= 3) {
+        sb.innerText = `🔥 ${currentStreak} Streak!`;
+        sb.classList.remove('hidden');
+      } else {
+        sb.classList.add('hidden');
+      }
+
+      const inp = document.getElementById('typeInput');
+      inp.value = '';
+      inp.className = "w-full bg-slate-950 border-2 border-slate-800 rounded-2xl px-6 py-4 text-center text-xl text-white font-medium focus:outline-none focus:border-blue-500 transition placeholder-slate-600 shadow-inner";
+      
+      const fb = document.getElementById('typeFeedback');
+      fb.style.opacity = '0';
     }
 
     function handleTypingSubmit(e) {
-      e.preventDefault();
-      const input = document.getElementById('typingInput');
-      const userAns = normalizeText(input.value);
-      const current = practiceList[currentIndex];
-      const correctAns = normalizeText(current.term);
+      if (e.key !== 'Enter') return;
+      if (isAnswered) {
+        currentIdx++;
+        updateTypingUI();
+        return;
+      }
 
-      if(!userAns) return;
-
-      input.disabled = true;
-      document.getElementById('typingSubmitBtn').classList.add('hidden');
-      const feedback = document.getElementById('typingFeedback');
-      const msg = document.getElementById('feedbackMessage');
-      feedback.classList.remove('hidden');
-      document.getElementById('correctWordText').innerText = current.term;
+      const inp = e.target;
+      const userAns = inp.value.trim().toLowerCase();
+      const current = practiceList[currentIdx];
+      const correctAns = current.term.trim().toLowerCase();
+      const fb = document.getElementById('typeFeedback');
+      
+      isAnswered = true;
 
       if(userAns === correctAns) {
         currentStreak++;
-        if (!current.level) current.level = 1; // Eski kelimeler için güvenlik
-        if (current.level < 5) current.level++;
-        saveWords();
         
-        msg.innerText = "✓ Harika! Doğru Bildin";
-        msg.className = "font-bold text-base text-emerald-400";
-        feedback.className = "mt-6 w-full flex flex-col items-center gap-3 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10";
-        input.className = "w-full bg-slate-950 border-2 border-emerald-500 rounded-xl px-4 py-3.5 text-center text-lg font-bold text-emerald-400 tracking-wide";
-        speakText(current.term);
-    
+        // DOĞRU BİLİNCE YILDIZ ARTIRMA (Maksimum 5)
+        if (!current.level) current.level = 1;
+        if (current.level < 5) current.level++;
+        
+        const realWord = words.find(w => w.id === current.id);
+        if(realWord) { realWord.level = current.level; }
+        saveWords();
+
+        inp.className = "w-full bg-emerald-950/30 border-2 border-emerald-500 text-emerald-400 rounded-2xl px-6 py-4 text-center text-xl font-medium focus:outline-none transition shadow-[0_0_15px_rgba(16,185,129,0.2)]";
+        fb.innerText = "✓ Harika! Doğru Bildin (Devam için Enter)";
+        fb.className = "absolute -bottom-8 left-0 w-full text-center text-sm font-bold text-emerald-400 transition-opacity";
       } else {
         currentStreak = 0;
-        current.level = 1;
-        saveWords();
         
-        msg.innerText = "✕ Dikkat, Doğru Yazılışı İncele:";
-        msg.className = "font-bold text-base text-rose-400";
-        feedback.className = "mt-6 w-full flex flex-col items-center gap-3 p-4 rounded-xl border border-rose-500/30 bg-rose-500/10";
-        input.className = "w-full bg-slate-950 border-2 border-rose-500 rounded-xl px-4 py-3.5 text-center text-lg font-bold text-rose-400 tracking-wide";
-        speakText(current.term);
+        // YANLIŞ BİLİNCE YILDIZI 1'E DÜŞÜRME
+        current.level = 1; 
+        const realWord = words.find(w => w.id === current.id);
+        if(realWord) { realWord.level = 1; }
+        saveWords();
+
+        inp.value = current.term;
+        inp.className = "w-full bg-rose-950/30 border-2 border-rose-500 text-rose-400 rounded-2xl px-6 py-4 text-center text-xl font-medium focus:outline-none transition shadow-[0_0_15px_rgba(244,63,94,0.2)]";
+        fb.innerText = "✕ Dikkat, Doğru Yazılışı İncele (Devam için Enter)";
+        fb.className = "absolute -bottom-8 left-0 w-full text-center text-sm font-bold text-rose-400 transition-opacity";
       }
-
-      document.getElementById('streakCount').innerText = currentStreak;
-      document.getElementById('nextQuestionBtn').focus();
+      fb.style.opacity = '1';
     }
 
-    function speakCurrentWord() {
-      speakText(practiceList[currentIndex].term);
-    }
-
-    function nextTypingWord() {
-      currentIndex++;
-      if(currentIndex >= practiceList.length) {
-        alert(`Tebrikler! Seti tamamladın. Toplam kelime: ${practiceList.length}`);
-        closePractice();
-      } else {
-        loadTypingWord();
-      }
-    }
-
-    // 2. KART ÇEVİRME MODU
-    function startFlashcardMode() {
-      practiceList = [...getActiveList()].sort(() => Math.random() - 0.5);
-      if(practiceList.length === 0) return alert('Çalışmak için önce bir kelime ekle.');
-
-      currentIndex = 0;
-      isFlipped = false;
-      document.getElementById('typingView').classList.add('hidden');
-      document.getElementById('flashcardView').classList.remove('hidden');
-      document.getElementById('streakCounter').classList.add('hidden');
-      enterPracticeMode();
-      loadCardData();
-    }
-
-    function loadCardData() {
-      isFlipped = false;
-      document.getElementById('cardInner').classList.remove('rotate-y-180');
-      const current = practiceList[currentIndex];
-      document.getElementById('practiceProgress').innerText = `${currentIndex + 1} / ${practiceList.length}`;
-      document.getElementById('cardFrontText').innerText = current.term;
-      document.getElementById('cardBackText').innerText = current.meaning;
-      document.getElementById('cardBackExample').innerText = current.example ? `"${current.example}"` : '';
-    }
-
-    function flipCard() {
-      isFlipped = !isFlipped;
-      const card = document.getElementById('cardInner');
-      if(isFlipped) card.classList.add('rotate-y-180');
-      else card.classList.remove('rotate-y-180');
-    }
-
-    function speakCardWord() {
-      speakText(practiceList[currentIndex].term);
-    }
-
-    function nextCard() {
-      if(currentIndex < practiceList.length - 1) {
-        currentIndex++;
-        loadCardData();
-      } else {
-        alert('Tüm kartları gözden geçirdin!');
-        closePractice();
-      }
-    }
-
-    function prevCard() {
-      if(currentIndex > 0) {
-        currentIndex--;
-        loadCardData();
-      }
-    }
-
-    // YEDEK AKTAR / DIŞA AKTAR
-    function exportData() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(words, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `vocab_forge_backup_${new Date().toISOString().slice(0,10)}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    }
-
-    function importData(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (Array.isArray(imported)) {
-            words = imported;
-            saveWords();
-            closeModal('backupModal');
-            alert('Yedek başarıyla yüklendi!');
-          } else {
-            alert('Geçersiz dosya formatı.');
-          }
-        } catch (err) {
-          alert('Dosya okunurken bir hata oluştu.');
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    // İlk Başlatma
-    updateCounts();
     renderWordList();
   </script>
 </body>
